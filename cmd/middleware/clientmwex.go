@@ -30,7 +30,7 @@ func main() {
 }
 
 func clientMiddleware() http.RoundTripper {
-	var rt RoundTripFunc
+	var rt clientmw.RoundTripFunc
 
 	const wait, tries = 10 * time.Millisecond, 3
 

@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Avalanchian/learn-backend/middleware/ctxutil"
-	"github.com/Avalanchian/learn-backend/middleware/trace"
+	"github.com/Avalanchian/learn-backend/ctxutil"
+	"github.com/Avalanchian/learn-backend/trace"
 
 	"github.com/google/uuid"
 )
@@ -35,7 +35,7 @@ func TimeRequest(rt http.RoundTripper) RoundTripFunc {
 		defer logExec("TimeRequest")() //logging for educational purposes
 
 		start := time.Now()
-		resp, err := RoundTrip(r) // calls the next middleware
+		resp, err := rt.RoundTrip(r) // calls the next middleware
 		if err != nil {
 			log.Printf("%s %s errored after %s", r.Method, r.URL, time.Since(start))
 			return nil, err
@@ -46,7 +46,7 @@ func TimeRequest(rt http.RoundTripper) RoundTripFunc {
 			r.Method,
 			r.URL,
 			resp.StatusCode,
-			resp.StatusText(resp.StatusCode),
+			http.StatusText(resp.StatusCode),
 			time.Since(start),
 		)
 		return resp, nil
@@ -66,7 +66,7 @@ func RetryOn5xx(rt http.RoundTripper, wait time.Duration, tries int) RoundTripFu
 		defer logExec("RetryOn5xx")()
 
 		var retryErrs error
-		for retry := uint(0); retry < tries; retry++ {
+		for retry := 0; retry < tries; retry++ {
 			if retry > 0 {
 				time.Sleep(wait << retry)
 			}
@@ -108,7 +108,7 @@ func Trace(rt http.RoundTripper) RoundTripFunc {
 
 		r.Header.Set("X-Trace-ID", trace.TraceID.String())
 		r.Header.Set("X-Request-ID", trace.RequestID.String())
-		return RoundTrip(r)
+		return rt.RoundTrip(r)
 	}
 }
 
@@ -116,11 +116,12 @@ func Log(rt http.RoundTripper) RoundTripFunc {
 	return func(r *http.Request) (*http.Response, error) {
 		defer logExec("Log")()
 
-		trace, ok := ctxutil.Value[Trace](r.Context())
+		var prefix string
+		trace, ok := ctxutil.Value[trace.Trace](r.Context())
 		if ok {
-			prefix := fmt.Sprintf("%s %s: [%s %s]: ", r.Method, r.URL, trace.TraceID, trace.RequestID)
+			prefix = fmt.Sprintf("%s %s: [%s %s]: ", r.Method, r.URL, trace.TraceID, trace.RequestID)
 		} else {
-			prefix := fmt.Sprintf("%s %s: ", r.Method, r.URL)
+			prefix = fmt.Sprintf("%s %s: ", r.Method, r.URL)
 		}
 
 		logger := log.New(os.Stderr, prefix, log.LstdFlags|log.Lshortfile)
@@ -134,7 +135,7 @@ func Log(rt http.RoundTripper) RoundTripFunc {
 			return nil, err
 		}
 
-		logger.Printf("%d %s in %s", resp.StatusCode, resp.StatusText(resp.StatusCode), time.Since(start))
+		logger.Printf("%d %s in %s", resp.StatusCode, http.StatusText(resp.StatusCode), time.Since(start))
 		return resp, nil
 	}
 }

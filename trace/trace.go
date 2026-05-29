@@ -2,7 +2,7 @@ package trace
 
 import "github.com/google/uuid"
 
-type trace struct {
+type Trace struct {
 	TraceID   uuid.UUID
 	RequestID uuid.UUID
 }
