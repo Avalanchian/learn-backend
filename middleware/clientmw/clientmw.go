@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/avalanchian/learn-backend/middleware/ctxutil"
-	"github.com/avalanchian/learn-backend/middleware/trace"
+	"github.com/Avalanchian/learn-backend/middleware/ctxutil"
+	"github.com/Avalanchian/learn-backend/middleware/trace"
 
 	"github.com/google/uuid"
 )

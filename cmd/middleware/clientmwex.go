@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"learn-backend/middleware/clientmw"
+	"github.com/Avalanchian/learn-backend/middleware/clientmw"
 )
 
 func main() {
