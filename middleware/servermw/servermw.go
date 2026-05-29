@@ -23,11 +23,11 @@ func Trace(h http.Handler) http.HandlerFunc {
 		}
 		ReqID, err := uuid.Parse(r.Header.Get("X-Request-Id"))
 		if err != nil {
-			RequestID = uuid.New()
+			ReqID = uuid.New()
 		}
 
 		trace := trace.Trace{TraceID: TraceID, RequestID: ReqID}
-		ctx := ctxutil.WithValue(ctx, trace)
+		ctx = ctxutil.WithValue(ctx, trace)
 		r = r.WithContext(ctx)
 
 		h.ServeHTTP(w, r)
@@ -77,7 +77,7 @@ func RecordResponse(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rrw := &RecordingResponseWriter{RW: w}
 		start := time.Now()
-		h.ServeHTTP(rrw, h)
+		h.ServeHTTP(rrw, r)
 		elapsed := time.Since(start)
 
 		logger, ok := ctxutil.Value[*log.Logger](r.Context())
