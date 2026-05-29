@@ -1,4 +1,4 @@
-module github.com/avalanchian/learn-backend
+module github.com/Avalanchian/learn-backend
 
 go 1.26.3
 
