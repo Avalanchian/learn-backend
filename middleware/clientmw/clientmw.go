@@ -32,8 +32,6 @@ func logExec(name string) func() {
 
 func TimeRequest(rt http.RoundTripper) RoundTripFunc {
 	return func(r *http.Request) (*http.Response, error) {
-		defer logExec("TimeRequest")() //logging for educational purposes
-
 		start := time.Now()
 		resp, err := rt.RoundTrip(r) // calls the next middleware
 		if err != nil {
@@ -63,8 +61,6 @@ func RetryOn5xx(rt http.RoundTripper, wait time.Duration, tries int) RoundTripFu
 	}
 
 	return func(r *http.Request) (*http.Response, error) {
-		defer logExec("RetryOn5xx")()
-
 		var retryErrs error
 		for retry := 0; retry < tries; retry++ {
 			if retry > 0 {
@@ -94,8 +90,6 @@ func RetryOn5xx(rt http.RoundTripper, wait time.Duration, tries int) RoundTripFu
 
 func Trace(rt http.RoundTripper) RoundTripFunc {
 	return func(r *http.Request) (*http.Response, error) {
-		defer logExec("Trace")()
-
 		traceID, err := uuid.Parse(r.Header.Get("X-Trace-ID"))
 		if err != nil {
 			traceID = uuid.New()
@@ -114,8 +108,6 @@ func Trace(rt http.RoundTripper) RoundTripFunc {
 
 func Log(rt http.RoundTripper) RoundTripFunc {
 	return func(r *http.Request) (*http.Response, error) {
-		defer logExec("Log")()
-
 		var prefix string
 		trace, ok := ctxutil.Value[trace.Trace](r.Context())
 		if ok {
