@@ -41,7 +41,7 @@ func applyMiddleware(h http.HandlerFunc) http.HandlerFunc {
 
 func BuildRouter() *http.ServeMux {
 	router := http.NewServeMux()
-	router.HandleFunc("GET /", applyMiddleware(indexHandler))
+	router.HandleFunc("GET /{$}", applyMiddleware(indexHandler))
 	router.HandleFunc("GET /panic", applyMiddleware(panicHandler))
 	router.HandleFunc("POST /greet/json", applyMiddleware(greetHandler))
 	router.HandleFunc("GET /time", applyMiddleware(timeHandler))

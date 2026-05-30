@@ -39,17 +39,19 @@ func TestMain(m *testing.M) {
 func TestNotFound(t *testing.T) {
 	for _, tt := range []struct {
 		method, path string
+		wantStatus   int
 	}{
-		{"DELETE", "/"},
-		{"GET", "/notfound"},
-		{"GET", "/chess/replay/efronlicht/bobross/1234"},
+		{"DELETE", "/", http.StatusMethodNotAllowed},
+		{"GET", "/notfound", http.StatusNotFound},
+		{"GET", "/chess/replay/efronlicht/bobross/1234", http.StatusNotFound},
 	} {
 		req, _ := http.NewRequest(tt.method, server.URL+tt.path, nil)
 
-		if resp, err := client.Do(req); err != nil {
+		resp, err := client.Do(req)
+		if err != nil {
 			t.Errorf("client.Do(%q, %q) returned error: %v", tt.method, tt.path, err)
-		} else if resp.StatusCode != http.StatusNotFound {
-			t.Errorf("client.Do(%q, %q) returned status %d, want %d", tt.method, tt.path, resp.StatusCode, http.StatusNotFound)
+		} else if resp.StatusCode != tt.wantStatus {
+			t.Errorf("client.Do(%q, %q) returned status %d, want %d", tt.method, tt.path, resp.StatusCode, tt.wantStatus)
 		}
 	}
 }
@@ -74,7 +76,7 @@ func TestGraduation(t *testing.T) {
 			method:           "GET",
 			path:             "/panic",
 			wantStatus:       http.StatusInternalServerError,
-			wantBodyContains: []string{"Internal Server Error"},
+			wantBodyContains: []string{"internal server error"},
 		},
 		{
 			method:           "POST",
